@@ -1,34 +1,19 @@
 import os
 
-
-class Instruction(object):
-    address = None
-
-    def __init__(self, label, operation, operand):
-        self.label = label
-        self.operation = operation
-        self.operand = operand
-
-    def get_word_operand(self):
-        return hex(self.operand)[2:]
-
-    def get_byte_operand(self):
-        first_letter = self.operand[0].casefold()
-        if first_letter == "C".casefold():
-            return "".join([hex(ord(char))[2:] for char in self.operand[2:-1]])
-        elif first_letter == "X".casefold():
-            return self.operand[2:-1]
+from SIC_XE.AddressingModesClass import get_target_address
+from SIC_XE.InstructionClass import Instruction
 
 
 def read_file(file_name):
     if os.path.isfile(file_name):
         lines = []
         with open(file_name) as f:
-            lines.append(f.readline())
+            for line in f.readlines():
+                lines.append(line)
         return lines
 
 
-def parse_line(lines):
+def parse_lines(lines):
     instructions = []
     instr = None
     for line in lines:
@@ -37,22 +22,28 @@ def parse_line(lines):
             instr = Instruction(label=splitted[0], operation=splitted[1], operand=splitted[2])
         elif len(splitted) == 2:
             instr = Instruction(label=None, operation=splitted[0], operand=splitted[1])
+        elif len(splitted) == 2:
+            instr = Instruction(label=None, operation=splitted[0], operand=None)
         instructions.append(instr)
     return instructions
 
 
 def calc_addresses(instructions):
-    current_address = 0x0000
+    starting_address = 0x0000
     first_instr = instructions[0]
     if first_instr.operation.casefold() == "START".casefold():
-        current_address = int(first_instr.operand, 16)
+        starting_address = int(first_instr.operand, 16)
+    current_address = starting_address
     for instr in instructions:
+        instr.address = hex(current_address)
+        if instr.operation.casefold() == "START".casefold():
+            continue  # as the instruction with start has no length
         if instr.operation.casefold() == "BYTE".casefold():
             instruction_length = round(len(instr.operand) / 2)
         else:
             instruction_length = 0x3
         current_address += instruction_length
-        instr.address = hex(current_address)
+    return current_address - starting_address
 
 
 def create_symbol_table(instructions):
@@ -66,7 +57,7 @@ def create_symbol_table(instructions):
     return symbol_table
 
 
-def create_obj_code(instructions, sym_table, op_table):
+def create_obj_codes(instructions, sym_table, op_table):
     obj_codes = []
     for instr in instructions:
         operation = instr.operation.casefold()
@@ -74,14 +65,15 @@ def create_obj_code(instructions, sym_table, op_table):
                 or operation == "RESB".casefold() \
                 or operation == "START".casefold() \
                 or operation == "END".casefold():
-            obj_codes.append(None)
+            instr.obj_code = None
         elif operation == "WORD".casefold():
-            obj_codes.append(instr.get_word_operand())
+            instr.obj_code = instr.get_word_operand()
         elif operation == "BYTE".casefold():
-            obj_codes.append(instr.get_byte_operand())
+            instr.obj_code = instr.get_byte_operand()
         else:
-            obj_code = "%s%s".format(op_table[instr.operation], sym_table[instr.operand])
-            if instr.operand[-2:].casefold() == ",X".casefold():  # no need to check for length as we use ':'
-                obj_code = hex(0x8000 + int(obj_code, 16))[2:]
-            obj_codes.append(obj_code)
+            instr.check_addressing_mode()
+            target_address = get_target_address(instr.addressing_mode, sym_table[instr.operand])
+            obj_code = "{}{}".format(op_table[instr.operation], target_address)
+            instr.obj_code = obj_code
+        obj_codes.append(instr.obj_code)
     return obj_codes
