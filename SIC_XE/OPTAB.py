@@ -1,6 +1,8 @@
 class Operation(object):
-    def __init__(self, obj_code, format):
-        pass
+    def __init__(self, obj_code, i_format):
+        self.obj_code = obj_code
+        self.format = i_format
+
 
 OPTAB = {"ADD": "18",
          "AND": "40",
@@ -28,3 +30,47 @@ OPTAB = {"ADD": "18",
          "TD": "E0",
          "TIX": "2C",
          "WD": "DC"}
+
+OPTABXE = {
+    "ADD": Operation("18", 3),
+    "ADDF": Operation("58", 3),
+    "ADDR": Operation("90", 2),
+    "AND": Operation("40", 3),
+    "CLEAR": Operation("B4", 2),
+    "COMP": Operation("28", 3),
+    "COMPF": Operation("88", 3),
+    "COMPR": Operation("A0", 2),
+    "DIV": Operation("24", 3),
+    "DIVF": Operation("64", 3),
+    "DIVR": Operation("9C", 2),
+    "FIX": Operation("C4", 1),
+    "FLOAT": Operation("C0", 1),
+    "HIO": Operation("F4", 1),
+    "J": Operation("3C", 3),
+    "JEQ": Operation("30", 3),
+    "JGT": Operation("34", 3),
+    "JLT": Operation("38", 3),
+    "JSUB": Operation("48", 3),
+    "LDA": Operation("00", 3),
+    "LDB": Operation("68", 3),
+    "LDCH": Operation("50", 3),
+    "LDF": Operation("70", 3),
+    "LDL": Operation("74", 3),
+    "LDX": Operation("04", 3),
+    "LDS": Operation("6C", 3),
+    "LDT": Operation("6C", 3),
+    "MUL": Operation("20", 3),
+    "OR": Operation("44", 3),
+    "RD": Operation("D8", 3),
+    "RSUB": Operation("4C", 3),
+    "STA": Operation("0C", 3),
+    "STCH": Operation("54", 3),
+    "STL": Operation("14", 3),
+    "STSW": Operation("E8", 3),
+    "STX": Operation("10", 3),
+    "SUB": Operation("1C", 3),
+    "TD": Operation("E0", 3),
+    "TIX": Operation("2C", 3),
+    "TIXR": Operation("B8", 2),
+    "WD": Operation("DC", 3)
+}
