@@ -4,6 +4,23 @@ class Operation(object):
         self.format = i_format
 
 
+class BaseReg(object):
+    BaseValue = 51
+    BaseFlag = False
+
+
+class AddressingModes(object):
+    IMMEDIATE = 0b010000
+    INDIRECT = 0b100000
+    DIRECT = 0b110000
+
+    PC_RELATIVE = 0b000010
+    BASE_RELATIVE = 0b000100
+
+    INDEXED = 0b001000
+    EXTENDED = 0b000001
+
+
 OPTAB = {"ADD": "18",
          "AND": "40",
          "COMP": "28",
@@ -31,7 +48,7 @@ OPTAB = {"ADD": "18",
          "TIX": "2C",
          "WD": "DC"}
 
-OPTABXE = {
+OperationTable = {
     "ADD": Operation("18", 3),
     "ADDF": Operation("58", 3),
     "ADDR": Operation("90", 2),
@@ -55,10 +72,10 @@ OPTABXE = {
     "LDB": Operation("68", 3),
     "LDCH": Operation("50", 3),
     "LDF": Operation("70", 3),
-    "LDL": Operation("74", 3),
+    "LDL": Operation("08", 3),
     "LDX": Operation("04", 3),
     "LDS": Operation("6C", 3),
-    "LDT": Operation("6C", 3),
+    "LDT": Operation("74", 3),
     "MUL": Operation("20", 3),
     "OR": Operation("44", 3),
     "RD": Operation("D8", 3),
@@ -74,3 +91,15 @@ OPTABXE = {
     "TIXR": Operation("B8", 2),
     "WD": Operation("DC", 3)
 }
+
+RegisterTable = {
+    "A": 0,
+    "X": 1,
+    "L": 2,
+    "B": 3,
+    "S": 4,
+    "T": 5,
+    "F": 6
+}
+
+SymbolTable = {}

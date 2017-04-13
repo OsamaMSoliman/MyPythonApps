@@ -1,4 +1,4 @@
-from SIC_XE.SIC_Funcs import *
+from SIC_XE.SIC_XE_methods import *
 
 
 def test_print(things):
@@ -40,12 +40,56 @@ def test_create_symbol_table(instructions):
     print(">>> test_create_symbol_table :-")
     symbol_table = create_symbol_table(instructions)
     test_print(symbol_table)
-    return symbol_table
 
 
-def test_create_obj_codes(instructions, symbol_table, OPTAB):
+def test_create_obj_codes(instructions):
     print(">>> test_create_obj_codes :- ")
-    object_codes = create_obj_codes(instructions, symbol_table, OPTAB)
+    object_codes = create_obj_codes(instructions)
     test_print(instructions)
     test_print(object_codes)
     return object_codes
+
+
+def test_similarObjectCodes(objlist):
+    list = ["17202D", "69202D", "4B101036", "032026", "290000", "332007", "4B10105D", "3F2FEC", "032010", "0F2016",
+            "010003", "0F200D", "4B10105D", "3E2003", "454F46", "B410", "B400", "B440", "75101000", "E32019", "332FFA",
+            "DB2013", "A004", "332008", "57C003", "B850", "3B2FEA", "134000", "4F0000", "F1", "B410", "774000",
+            "E32011", "332FFA", "53C003", "DF2008", "B850"]
+    i, j = 0, 0
+    while i < len(list) and j < len(objlist):
+        while objlist[j] is None:
+            print("None")
+            j += 1
+        print(i, list[i], " )_( ", objlist[j], end="")
+        if list[i] == objlist[j]:
+            print()
+        else:
+            print("     <== ")
+        i += 1
+        j += 1
+
+
+def test_OPTAB_Duplicates():
+    dic = {}
+    for e in OperationTable:
+        if OperationTable[e].obj_code in dic:
+            dic[OperationTable[e].obj_code] += 1
+            print(e, OperationTable[e].obj_code, " <= Duplicate")
+        else:
+            dic[OperationTable[e].obj_code] = 0
+
+
+
+def run_test():
+    lines = test_read_file("exampleXE.txt")
+    instructions = test_parse_lines(lines)
+    prog_len = test_calc_addresses(instructions)
+    test_create_symbol_table(instructions)
+    obj_codes = test_create_obj_codes(instructions)
+    test_similarObjectCodes(obj_codes)
+    test_OPTAB_Duplicates()
+
+
+
+if __name__ == "__main__":
+    run_test()
