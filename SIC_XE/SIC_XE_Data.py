@@ -1,3 +1,6 @@
+NO_ERROR = True
+
+
 class Operation(object):
     def __init__(self, obj_code, i_format):
         self.obj_code = obj_code
@@ -7,6 +10,19 @@ class Operation(object):
 class BaseReg(object):
     BaseValue = 51
     BaseFlag = False
+    __UnOfficialValue = 0
+
+    @staticmethod
+    def check_ldb(instruction):
+        if instruction.operation.casefold() == "LDB".casefold():
+            if instruction.operand.isdigit():
+                BaseReg.__UnOfficialValue = int(instruction.operand)
+            else:
+                BaseReg.__UnOfficialValue = int(SymbolTable.get(instruction.operand), 16)
+
+    @staticmethod
+    def setBaseValue():
+        BaseReg.BaseValue = BaseReg.__UnOfficialValue
 
 
 class AddressingModes(object):

@@ -46,7 +46,9 @@ def test_create_obj_codes(instructions):
     print(">>> test_create_obj_codes :- ")
     object_codes = create_obj_codes(instructions)
     test_print(instructions)
-    test_print(object_codes)
+    print("Address\tObjCode")
+    for i in instructions:
+        print(i.address, "\t", i.obj_code)
     return object_codes
 
 
@@ -79,16 +81,15 @@ def test_OPTAB_Duplicates():
             dic[OperationTable[e].obj_code] = 0
 
 
-
 def run_test():
-    lines = test_read_file("exampleXE.txt")
-    instructions = test_parse_lines(lines)
-    prog_len = test_calc_addresses(instructions)
-    test_create_symbol_table(instructions)
+    lines = read_file("exampleXE.txt")
+    instructions = parse_lines(lines)
+    prog_len = calc_addresses(instructions)
+    create_symbol_table(instructions)
     obj_codes = test_create_obj_codes(instructions)
-    test_similarObjectCodes(obj_codes)
-    test_OPTAB_Duplicates()
-
+    # test_similarObjectCodes(obj_codes)
+    # test_OPTAB_Duplicates()
+    create_objfile(instructions, prog_len)
 
 
 if __name__ == "__main__":

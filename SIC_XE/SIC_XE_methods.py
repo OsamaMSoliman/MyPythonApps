@@ -82,6 +82,7 @@ def create_obj_codes(instructions):
         elif operation == "BASE".casefold():
             instr.obj_code = None
             BaseReg.BaseFlag = True
+            BaseReg.setBaseValue()
         elif operation == "NOBASE".casefold():
             instr.obj_code = None
             BaseReg.BaseFlag = False
@@ -91,6 +92,7 @@ def create_obj_codes(instructions):
             instr.obj_code = instr.get_byte_operand()
         else:
             calc_object_code(instr)
+            BaseReg.check_ldb(instr)
         obj_codes.append(instr.obj_code)
     return obj_codes
 
@@ -158,7 +160,7 @@ def format3_4(instr):
 
 def calc_disp(target_address, PC_value):
     nixbpe = AddressingModes.PC_RELATIVE
-    print(target_address, PC_value, BaseReg.BaseValue)
+    # print(target_address, PC_value, BaseReg.BaseValue)
     target_address = int(target_address, 16)
     disp = target_address - PC_value
     if disp < -2048 or disp > 2047:
@@ -175,15 +177,35 @@ def calc_disp(target_address, PC_value):
 
 
 def create_lisfile(instructions):
-    pass
+    with open("lisfile", "w+") as f:
+        for instr in instructions:
+            f.write(instr.list_file_format())
 
 
-def create_objfile(first_instr, prog_len, obj_codes):
-    pass
+def create_objfile(instructions, prog_len):
+    if NO_ERROR:
+        records = []
+        h_record = create_h_record(instructions[0], prog_len)
+        # print(h_record)
+        records.append(h_record)
+        d_records = create_d_record()
+        # records.extend(d_records)
+        r_records = create_r_record()
+        # records.extend(r_records)
+        t_records = create_t_record(instructions)
+        records.extend(t_records)
+        m_records = create_m_record(instructions)
+        records.extend(m_records)
+        e_record = create_e_record(instructions[-1])
+        # print(e_record)
+        records.append(e_record)
+        with open("objfile", "w+") as f:
+            for record in records:
+                f.write(record + "\n")
 
 
 def create_h_record(first_instr, prog_len):
-    return "H{:6}{:06X}{:06X}".format(first_instr.label, int(first_instr.operand, 16), prog_len)
+    return "H^{:6}^{:06X}^{:06X}".format(first_instr.label, int(first_instr.operand, 16), prog_len)
 
 
 def create_d_record():
@@ -194,22 +216,62 @@ def create_r_record():
     pass
 
 
-def create_t_record(obj_codes):
+def create_t_record(instructions):
     t_records = []
-    t_record = None
-    record_length = 0
-    max_length = 30
-    for i in range(len(obj_codes)):
-        if obj_codes[i] is None or record_length >= max_length:
-            t_records.append(t_record)
-            t_record = "T"
+    byte_counter = 0
+    byte_string = ""
+    skip = False
+    exceeded30 = False
+    temp_byte_string = None
+    temp_byte_size = 0
+    temp_byte_address = None
+    for inst in instructions:
+        if not skip:
+            byte_starting_address = inst.address
+            skip = True
+        if exceeded30 or inst.obj_code == None:
+            if not byte_counter == 0:
+                t_record = "T^{:06X}^{:02X}^{}".format(int(byte_starting_address, 16), byte_counter, byte_string)
+                # print(t_record)
+                t_records.append(t_record)
+            byte_string = ""
+            byte_counter = 0
+            if exceeded30:
+                exceeded30 = False
+                byte_string += temp_byte_string + "."
+                byte_counter += temp_byte_size
+                byte_starting_address = temp_byte_address
+            else:
+                skip = False
+                continue
+        if byte_counter + inst.length <= 30:
+            byte_string += inst.obj_code + "."
+            byte_counter += inst.length
         else:
-            t_record = "%s%s" % (t_record, [obj_codes[i]])
+            temp_byte_string = inst.obj_code
+            temp_byte_size = inst.length
+            temp_byte_address = inst.address
+            exceeded30 = True
+    return t_records
 
 
-def create_m_record():
-    pass
+def create_m_record(instructions):
+    m_records = []
+    for instr in instructions:
+        if instr.length == 4 and instr.addressing_mode & AddressingModes.DIRECT == AddressingModes.DIRECT:
+            # if instr.operand in
+            m_record = "M^{:06X}^05^+{}".format(int(instr.address, 16) + 1,
+                                                instructions[0].label)  # Debugging :: modify this for External Def/Ref
+            # print(m_record)
+            m_records.append(m_record)
+        elif instr.operation.casefold() == "WORD".casefold() and False:  # Debugging :: modify this for External Def/Ref
+            sign = "+/-"
+            m_record = "M^{:06X}^06^{}{}".format(int(instr.address, 16) + 1, sign, instructions[0].label)
+            print(m_record)
+            m_records.append(m_record)
+    return m_records
 
 
-def create_e_record(first_instr):
-    return "E{:6}".format(first_instr.operand)
+def create_e_record(end_instr):
+    if SymbolTable.get(end_instr.operand) is not None:
+        return "E^{:06X}".format(int(SymbolTable[end_instr.operand], 16))

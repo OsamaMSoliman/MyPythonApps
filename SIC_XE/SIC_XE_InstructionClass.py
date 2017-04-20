@@ -46,3 +46,7 @@ class Instruction(object):
         return "{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}".format(self.address,
                                                          self.label, self.operation, self.operand,
                                                          bin(self.addressing_mode), self.obj_code)
+
+    def list_file_format(self):
+        # Debuggnig :: the format of each parameter and add the error if exists
+        return "{}\t{}\t{}\t{}\t{}".format(self.address, self.label, self.operation, self.operand, self.obj_code)
