@@ -1,4 +1,11 @@
-NO_ERROR = True
+class ERROR(object):
+    NO_ERROR = True
+    Undefined_Operation = ">>> Error Undefined operation! : "
+    Undefined_Symbol = ">>> Error this Symbol is undefined ! : "
+    Duplicated_Label = ">>> Error this label is duplicated! : "
+    Use_Base = ">>> Error Out of PC, must use BASE !"
+    Out_Of_Range = ">>> Error Out of PC and BASE ranges !"
+    Unknown_Format = ">>> Error Unknown Format !"
 
 
 class Operation(object):

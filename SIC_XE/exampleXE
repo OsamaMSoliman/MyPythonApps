@@ -43,4 +43,12 @@ WLOOP	TD		OUTPUT
         JLT    WLOOP
         RSUB
 OUTPUT  BYTE   X'06'
+. this is a comment before using literals
+.       LDA    =C'A'
+.        LTORG
+. the following lines will contain some errors intentionally
+.        XXX    #0
+.        LDA    XXX
+.XXXdup  WORD   99
+.XXXdup  BYTE   X'99'
         END    COPY

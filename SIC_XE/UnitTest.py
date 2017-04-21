@@ -59,7 +59,7 @@ def test_similarObjectCodes(objlist):
             "E32011", "332FFA", "53C003", "DF2008", "B850"]
     i, j = 0, 0
     while i < len(list) and j < len(objlist):
-        while objlist[j] is None:
+        while objlist[j] is None or objlist[j] == "":
             print("None")
             j += 1
         print(i, list[i], " )_( ", objlist[j], end="")
@@ -82,13 +82,14 @@ def test_OPTAB_Duplicates():
 
 
 def run_test():
-    lines = read_file("exampleXE.txt")
-    instructions = parse_lines(lines)
-    prog_len = calc_addresses(instructions)
-    create_symbol_table(instructions)
+    lines = test_read_file("exampleXE")
+    instructions = test_parse_lines(lines)
+    prog_len = test_calc_addresses(instructions)
+    test_create_symbol_table(instructions)
     obj_codes = test_create_obj_codes(instructions)
-    # test_similarObjectCodes(obj_codes)
-    # test_OPTAB_Duplicates()
+    test_similarObjectCodes(obj_codes)
+    test_OPTAB_Duplicates()
+    create_lisfile(instructions)
     create_objfile(instructions, prog_len)
 
 

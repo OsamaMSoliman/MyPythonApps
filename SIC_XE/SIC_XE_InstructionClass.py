@@ -9,7 +9,7 @@ class Instruction(object):
         self.addressing_mode = 0b000000
         self.address = None
         self.obj_code = None
-        self.error = False
+        self.error = None
         self.length = 0
 
     def check_addressing_mode(self):
@@ -48,5 +48,12 @@ class Instruction(object):
                                                          bin(self.addressing_mode), self.obj_code)
 
     def list_file_format(self):
-        # Debuggnig :: the format of each parameter and add the error if exists
-        return "{}\t{}\t{}\t{}\t{}".format(self.address, self.label, self.operation, self.operand, self.obj_code)
+        list_line = [int(self.address, 16), self.label, self.operation, self.operand, self.obj_code]
+        for i in range(len(list_line)):
+            if list_line[i] is None:
+                list_line[i] = ""
+        line = "{:04X}\t{:8}\t{:6}\t{:18}\t{}\n".format(list_line[0], list_line[1], list_line[2], list_line[3],
+                                                        list_line[4])
+        if self.error is not None:
+            line += self.error + "\n"
+        return line
