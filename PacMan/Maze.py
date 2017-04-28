@@ -1,6 +1,7 @@
 import random
-
 import math
+
+GameOver = False
 
 
 class Direction(object):
@@ -14,10 +15,10 @@ class Cell(object):
     SIZE = 10
 
     def __init__(self, posX, posY, score=1):
-        self.wall = self.__random_wall()
+        self.__wall = self.__random_wall()
         self.posX, self.posY = posX, posY
-        self.score = score
-        self.visited = False
+        self.__score = score
+        self.__visited = False
         self.has_enemy = False  # public var
 
     @staticmethod
@@ -27,25 +28,24 @@ class Cell(object):
 
     def get_cell_wall_list(self):
         walls = []
-        if self.wall & Direction.NORTH:
+        if self.__wall & Direction.NORTH:
             walls.append([(self.posX, self.posY + Cell.SIZE), (self.posX + Cell.SIZE, self.posY + Cell.SIZE)])
-        if self.wall & Direction.SOUTH:
+        if self.__wall & Direction.SOUTH:
             walls.append([(self.posX, self.posY), (self.posX + Cell.SIZE, self.posY)])
-        if self.wall & Direction.EAST:
+        if self.__wall & Direction.EAST:
             walls.append([(self.posX + Cell.SIZE, self.posY), (self.posX + Cell.SIZE, self.posY + Cell.SIZE)])
-        if self.wall & Direction.WEST:
+        if self.__wall & Direction.WEST:
             walls.append([(self.posX, self.posY), (self.posX, self.posY + Cell.SIZE)])
         return walls
 
     def collide_with_wall(self, direction):
-        return True if self.wall & direction else False
+        return True if self.__wall & direction else False
 
     def visit(self):
-        if not self.visited:
-            self.visited = True
-            self.score = 0
-        else:
-            return self.score
+        if not self.__visited:
+            self.__visited = True
+            self.__score = 0
+        return self.__score
 
 
 class Maze(object):
@@ -55,7 +55,7 @@ class Maze(object):
     def __init__(self, cell_size=10, cells_count=100):
         Cell.SIZE = cell_size
         Maze.SIZE = int(math.sqrt(cells_count))  # Maze SIZE = no. of rows or cols
-        self.walls = []
+        self.__walls = []
         self.__create_maze()
 
     @staticmethod
@@ -67,8 +67,8 @@ class Maze(object):
                     Maze.CELLS.append(Cell(i, j, score))
 
     def get_maze_wall_list(self):
-        if not self.walls:
+        if not self.__walls:
             for i in range(Maze.SIZE):
                 for j in range(Maze.SIZE):
-                    self.walls.extend(Maze.CELLS[i][j].get_cell_wall_list())
-        return self.walls
+                    self.__walls.extend(Maze.CELLS[i][j].get_cell_wall_list())
+        return self.__walls

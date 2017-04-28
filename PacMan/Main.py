@@ -1,4 +1,4 @@
-from PacMan.Maze import Maze, Direction
+from PacMan.Maze import Maze, Direction, GameOver
 from PacMan.Characters import Hero, Enemy
 
 maze = None
@@ -7,7 +7,7 @@ enemy1 = None
 enemy2 = None
 
 
-def init():
+def X_init():
     global maze
     global hero
     global enemy1
@@ -21,34 +21,36 @@ def init():
     enemy2 = Enemy(99, 99)
 
 
-def loop():
+def X_loop():
     global maze
     global hero
     global enemy1
     global enemy2
-    # draw Maze
-    maze_walls = maze.get_maze_wall_list()
-    Xdraw(maze_walls)
-    # draw character
-    Xdraw(hero.posX, hero.posY)
-    # draw enemy
-    Xdraw(enemy1.posX, enemy1.posY)
-    Xdraw(enemy2.posX, enemy2.posY)
-    # move enemy (delayed VERY IMP NOT EVERY FRAME!!!!) not sure what's the best way to approach this (maybe use
-    # threading, and maybe it shouldn't be here but in the enemy class itself) draw score
-    Xdraw(Hero.SCORE)
+    while not GameOver:
+        # draw Maze
+        maze_walls = maze.get_maze_wall_list()
+        X_draw(maze_walls)
+        # draw character
+        X_draw(hero.posX, hero.posY)
+        # draw enemy
+        X_draw(enemy1.posX, enemy1.posY)
+        X_draw(enemy2.posX, enemy2.posY)
+        # move enemy (delayed VERY IMP NOT EVERY FRAME!!!!) not sure what's the best way to approach this (maybe use
+        # threading, and maybe it shouldn't be here but in the enemy class itself) draw score
+        X_draw(Hero.SCORE)
 
 
 
-def key_event():
+def X_key_event():
     # move character
     global hero
-    if Xinput() == "UP":
-        hero.move(Direction.NORTH)
-    elif Xinput() == "DOWN":
-        hero.move(Direction.SOUTH)
-    elif Xinput() == "RIGHT":
-        hero.move(Direction.EAST)
-    elif Xinput() == "LEFT":
-        hero.move(Direction.WEST)
+    if not GameOver:
+        if X_input() == "UP":
+            hero._move(Direction.NORTH)
+        elif X_input() == "DOWN":
+            hero._move(Direction.SOUTH)
+        elif X_input() == "RIGHT":
+            hero._move(Direction.EAST)
+        elif X_input() == "LEFT":
+            hero._move(Direction.WEST)
 
