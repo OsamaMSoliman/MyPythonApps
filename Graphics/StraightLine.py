@@ -1,13 +1,9 @@
 # this code takes 2 points and calc the points of the straight line in between
 # NOTE this uses the midPoint method ( the slope must be less than 1 )
 
-# the 2 points
-pStart = (3, 5)
-pEnd = (8, 8)
-points = []
 
-
-def main():
+def straight_line(pStart, pEnd):
+    points = []
     # calc the slope to check if the midPoint method is valid
     dy = pEnd[1] - pStart[1]
     dx = pEnd[0] - pStart[0]
@@ -35,9 +31,10 @@ def main():
                 pNew = (points[-1][0] + 1, points[-1][1])
                 d += dy
             points.append(pNew)
-    for p in points:
-        print(p)
+    return points
 
 
 if __name__ == "__main__":
-    main()
+    points = straight_line((3, 5), (8, 8))
+    for p in points:
+        print(p)
