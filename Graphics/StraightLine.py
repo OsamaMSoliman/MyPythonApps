@@ -2,15 +2,16 @@
 # NOTE this uses the midPoint method ( the slope must be less than 1 )
 
 # the 2 points
-pStart = (3,5)
-pEnd = (8,8)
+pStart = (3, 5)
+pEnd = (8, 8)
 points = []
+
 
 def main():
     # calc the slope to check if the midPoint method is valid
     dy = pEnd[1] - pStart[1]
     dx = pEnd[0] - pStart[0]
-    m = dy/dx
+    m = dy / dx
     if m > 1 or m < 0:
         return
     # print the 1st point
@@ -23,7 +24,7 @@ def main():
     # else follow the midPoint method
     else:
         # get d0 1st
-        d = dy - dx/2
+        d = dy - dx / 2
         while points[-1][1] < pEnd[1] or points[-1][0] < pEnd[0]:
             # if NorthEast (NE)
             if d > 0:
@@ -36,6 +37,7 @@ def main():
             points.append(pNew)
     for p in points:
         print(p)
+
 
 if __name__ == "__main__":
     main()
