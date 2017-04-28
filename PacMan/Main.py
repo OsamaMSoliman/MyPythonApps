@@ -26,7 +26,7 @@ def X_loop():
     global hero
     global enemy1
     global enemy2
-    while not GameOver:
+    if not GameOver:
         # draw Maze
         maze_walls = maze.get_maze_wall_list()
         X_draw(maze_walls)
