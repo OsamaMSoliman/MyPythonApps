@@ -1,7 +1,5 @@
 import random
-import math
-
-GameOver = False
+from math import sqrt, ceil
 
 
 class Direction(object):
@@ -16,7 +14,7 @@ class Cell(object):
 
     def __init__(self, posX, posY, score=1):
         self.__wall = self.__random_wall()
-        self.posX, self.posY = posX, posY
+        self.posX, self.posY = posX * Cell.SIZE, posY * Cell.SIZE
         self.__score = score
         self.__visited = False
         self.has_enemy = False  # public var
@@ -24,7 +22,7 @@ class Cell(object):
     @staticmethod
     def __random_wall():
         walls = random.randint(0, 15) & random.randint(0, 15)
-        return walls if walls == 15 else 0
+        return walls if walls == 15 else random.randint(0, 15)
 
     def get_cell_wall_list(self):
         walls = []
@@ -39,6 +37,7 @@ class Cell(object):
         return walls
 
     def collide_with_wall(self, direction):
+        print(self.__wall)
         return True if self.__wall & direction else False
 
     def visit(self):
@@ -49,12 +48,13 @@ class Cell(object):
 
 
 class Maze(object):
+    GAME_OVER = False
     SIZE = None
     CELLS = []
 
     def __init__(self, cell_size=10, cells_count=100):
         Cell.SIZE = cell_size
-        Maze.SIZE = int(math.sqrt(cells_count))  # Maze SIZE = no. of rows or cols
+        Maze.SIZE = round(int(sqrt(cells_count)))  # Maze SIZE = no. of rows or cols
         self.__walls = []
         self.__create_maze()
 
@@ -63,12 +63,16 @@ class Maze(object):
         if not Maze.CELLS:
             for i in range(Maze.SIZE):
                 for j in range(Maze.SIZE):
-                    score = int(math.ceil(random.random() * 10))
+                    score = int(ceil(random.random() * 10))
                     Maze.CELLS.append(Cell(i, j, score))
 
     def get_maze_wall_list(self):
         if not self.__walls:
             for i in range(Maze.SIZE):
                 for j in range(Maze.SIZE):
-                    self.__walls.extend(Maze.CELLS[i][j].get_cell_wall_list())
+                    self.__walls.extend(Maze.CELLS[i * Maze.SIZE + j].get_cell_wall_list())
         return self.__walls
+
+    # def get_maze_pickups(self):
+    #     pickups = []
+    #     for
