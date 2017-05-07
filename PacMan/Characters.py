@@ -9,26 +9,28 @@ class __Character(object):
         self.posX, self.posY = posX, posY
 
     def move(self, direction):
-        if direction & Direction.NORTH:
-            if self.posY + 1 < Maze.SIZE and not Maze.CELLS[self.posX * Maze.SIZE + self.posY + 1].collide_with_wall(
-                    direction):
-                self.posY += 1
-                return True
-        elif direction & Direction.SOUTH:
-            if self.posY - 1 >= 0 and not Maze.CELLS[self.posX * Maze.SIZE + self.posY - 1].collide_with_wall(
-                    direction):
-                self.posY -= 1
-                return True
-        elif direction & Direction.EAST:
-            if self.posX + 1 < Maze.SIZE and not Maze.CELLS[(self.posX + 1) * Maze.SIZE + self.posY].collide_with_wall(
-                    direction):
-                self.posX += 1
-                return True
-        elif direction & Direction.WEST:
-            if self.posX - 1 > 0 and not Maze.CELLS[(self.posX - 1) * Maze.SIZE + self.posY].collide_with_wall(
-                    direction):
-                self.posX -= 1
-                return True
+        if not Maze.CELLS[self.posX * Maze.SIZE + self.posY].collide_with_wall(direction):
+            opposite_direction = Direction.opposite[direction]
+            if direction & Direction.NORTH:
+                if self.posY + 1 < Maze.SIZE and \
+                        not Maze.CELLS[self.posX * Maze.SIZE + self.posY + 1].collide_with_wall(opposite_direction):
+                    self.posY += 1
+                    return True
+            elif direction & Direction.SOUTH:
+                if self.posY - 1 >= 0 and \
+                        not Maze.CELLS[self.posX * Maze.SIZE + self.posY - 1].collide_with_wall(opposite_direction):
+                    self.posY -= 1
+                    return True
+            elif direction & Direction.EAST:
+                if self.posX + 1 < Maze.SIZE and \
+                        not Maze.CELLS[(self.posX + 1) * Maze.SIZE + self.posY].collide_with_wall(opposite_direction):
+                    self.posX += 1
+                    return True
+            elif direction & Direction.WEST:
+                if self.posX - 1 >= 0 and \
+                        not Maze.CELLS[(self.posX - 1) * Maze.SIZE + self.posY].collide_with_wall(opposite_direction):
+                    self.posX -= 1
+                    return True
         return False
 
 
@@ -49,7 +51,7 @@ class Hero(__Character):
                 Hero.LIVE -= 1
                 self.posX, self.posY = (-1, -1) if Hero.LIVE == 0 else (self._startingPosX, self._startingPosY)
                 if Hero.LIVE == 0:
-                    Maze.GAME_OVER = True
+                    Maze.Game_Over = True
             else:
                 Hero.SCORE += Maze.CELLS[self.posX * Maze.SIZE + self.posY].visit()
 
@@ -70,6 +72,6 @@ class Enemy(__Character):
             pass
 
     def __enemy_moving_loop(self):
-        while not Maze.GAME_OVER:
+        while not Maze.Game_Over:
             self.move(0b1 << random.randrange(4))
             sleep(1)

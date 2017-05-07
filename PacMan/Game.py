@@ -1,6 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+import OpenGL.GLUT.freeglut
 from math import cos, sin, pi as PI
 from PacMan.Maze import Maze, Direction
 from PacMan.Characters import Hero, Enemy
@@ -10,6 +11,8 @@ class Game(object):
     DEFAULT_WIDTH = 800
     DEFAULT_HEIGHT = 600
     NAME = b'PacMan'
+    GAME_OVER_TEXT = "GAME OVER!"
+    U_WON_TEXT = "U WON!"
 
     def __init__(self):
         self.__init_logic()
@@ -45,11 +48,12 @@ class Game(object):
         glutMainLoop()
 
     def MyDisplayFunc(self):
-        print("MyDisplayFunc")
+        # print("MyDisplayFunc")
         glClearColor(0.0, 0.0, 0.0, 1.0)  # Set background color to black and opaque
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)  # Clear the color buffer (background)
 
-        self.draw_walls(self.maze.get_maze_wall_list())
+        self.draw_walls()
+        self.draw_pickups()
         self.draw_hero()
         self.draw_enemy(self.enemy1)
         self.draw_enemy(self.enemy2)
@@ -61,17 +65,25 @@ class Game(object):
         # self.draw_enemy(Enemy(8,8))
         # self.draw_enemy(Enemy(9,9))
 
-
+        self.draw_score()
 
         glFlush()
         glutSwapBuffers()  # Swap the front and back frame buffers (double buffering)
 
-    def draw_walls(self, walls):
+    def draw_walls(self):
         glBegin(GL_LINES)
         glColor3f(1, 1, 1)
-        for wall in walls:
+        for wall in self.maze.get_maze_wall_list():
             glVertex2i(wall[0][0], wall[0][1])
             glVertex2i(wall[1][0], wall[1][1])
+        glEnd()
+
+    def draw_pickups(self):
+        glPointSize(5.0)
+        glBegin(GL_POINTS)
+        glColor3f(1, 1, 1)
+        for pickup in self.maze.get_maze_pickups():
+            glVertex2f(pickup[0], pickup[1])
         glEnd()
 
     def draw_hero(self):
@@ -93,7 +105,7 @@ class Game(object):
         glColor3f(1, 0, 0)
         center_x = enemy.posX * self.grid_unit_size + self.grid_unit_size / 2
         center_y = enemy.posY * self.grid_unit_size + self.grid_unit_size / 2
-        print(center_x, center_y)
+        # print(center_x, center_y)
         enemy_size = 4
         glBegin(GL_QUADS)
         glVertex2f(center_x, center_y + enemy_size)
@@ -102,13 +114,28 @@ class Game(object):
         glVertex2f(center_x - enemy_size, center_y)
         glEnd()
 
+    def draw_score(self):
+        glRasterPos2i(100, 120)
+        glColor4f(0.5, 0.6, 1.0, 1.0)
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render")
+
+    def draw_lives(self):
+        glRasterPos2i(100, 120)
+        glColor4f(0.5, 0.6, 1.0, 1.0)
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render")
+
+
+    def draw_game_over(self):
+        glRasterPos2i(100, 120)
+        glColor4f(0.5, 0.6, 1.0, 1.0)
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render")
+
     @staticmethod
     def MyIdleFunc():
         print("MyIdleFunc")
 
     def MyKeyboardFunc(self, key_byte, mouse_x, mouse_y):
-        print("MyKeyboardFunc : ", key_byte, mouse_x, mouse_y)
-
+        # print("MyKeyboardFunc : ", key_byte, mouse_x, mouse_y)
         if key_byte == b'w':
             self.hero.move(Direction.NORTH)
         elif key_byte == b's':
@@ -121,11 +148,12 @@ class Game(object):
 
     @staticmethod
     def MyMouseFunc(button_number, is_pressed, mouse_x, mouse_y):
-        print("MyMouseFunc : ", button_number, is_pressed, mouse_x, mouse_y)
+        # print("MyMouseFunc : ", button_number, is_pressed, mouse_x, mouse_y)
+        pass
 
     @staticmethod
     def MyReshapeFunc(width, height):
-        print("MyReshapeFunc : ", width, height)
+        # print("MyReshapeFunc : ", width, height)
         # Set the viewport to cover the new window
         glViewport(0, 0, width, height)
         # Set the aspect ratio of the clipping volume to match the viewport

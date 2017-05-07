@@ -7,6 +7,12 @@ class Direction(object):
     SOUTH = 0b0100
     EAST = 0b0010
     WEST = 0b0001
+    opposite = {
+        NORTH: SOUTH,
+        SOUTH: NORTH,
+        EAST: WEST,
+        WEST: EAST
+    }
 
 
 class Cell(object):
@@ -15,14 +21,15 @@ class Cell(object):
     def __init__(self, posX, posY, score=1):
         self.__wall = self.__random_wall()
         self.posX, self.posY = posX * Cell.SIZE, posY * Cell.SIZE
-        self.__score = score
+        self._score = score
         self.__visited = False
         self.has_enemy = False  # public var
 
     @staticmethod
     def __random_wall():
-        walls = random.randint(0, 15) & random.randint(0, 15)
-        return walls if walls == 15 else random.randint(0, 15)
+        # walls = random.randint(0, 15) & random.randint(0, 15)
+        walls = [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]
+        return random.choice(walls)  # walls if walls == 15 else random.randint(0, 15)
 
     def get_cell_wall_list(self):
         walls = []
@@ -37,18 +44,19 @@ class Cell(object):
         return walls
 
     def collide_with_wall(self, direction):
-        print(self.__wall)
+        print("cell ", self.posX, self.posY, " walls : ", bin(self.__wall))
         return True if self.__wall & direction else False
 
     def visit(self):
+        score = self._score
         if not self.__visited:
             self.__visited = True
-            self.__score = 0
-        return self.__score
+            self._score = 0
+        return score
 
 
 class Maze(object):
-    GAME_OVER = False
+    Game_Over = False
     SIZE = None
     CELLS = []
 
@@ -73,6 +81,9 @@ class Maze(object):
                     self.__walls.extend(Maze.CELLS[i * Maze.SIZE + j].get_cell_wall_list())
         return self.__walls
 
-    # def get_maze_pickups(self):
-    #     pickups = []
-    #     for
+    def get_maze_pickups(self):
+        # pickups = []
+        # for cell in Maze.CELLS:
+        #     if cell._score > 0: pickups.append((cell.posX + Cell.SIZE/2, cell.posY + Cell.SIZE/2))
+        # return pickups
+        return [(cell.posX + Cell.SIZE / 2, cell.posY + Cell.SIZE / 2) for cell in Maze.CELLS if cell._score > 0]
