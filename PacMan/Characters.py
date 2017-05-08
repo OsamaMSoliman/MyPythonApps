@@ -59,7 +59,7 @@ class Hero(__Character):
 class Enemy(__Character):
     def __init__(self, posX, posY):
         super().__init__(posX, posY)
-        # start_new_thread(self.__enemy_moving_loop, ())
+        start_new_thread(self.__enemy_moving_loop, ())
 
     def move(self, direction):
         # Debugging :: save current position

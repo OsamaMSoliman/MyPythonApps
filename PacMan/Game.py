@@ -1,7 +1,6 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import OpenGL.GLUT.freeglut
 from math import cos, sin, pi as PI
 from PacMan.Maze import Maze, Direction
 from PacMan.Characters import Hero, Enemy
@@ -10,6 +9,7 @@ from PacMan.Characters import Hero, Enemy
 class Game(object):
     DEFAULT_WIDTH = 800
     DEFAULT_HEIGHT = 600
+    REFRESH_TIME = 5
     NAME = b'PacMan'
     GAME_OVER_TEXT = "GAME OVER!"
     U_WON_TEXT = "U WON!"
@@ -25,6 +25,7 @@ class Game(object):
         self.hero = Hero(0, 0, 3)
         self.enemy1 = Enemy(1, 1)
         self.enemy2 = Enemy(2, 2)
+        Game.REFRESH_TIME = int(1000 / Game.REFRESH_TIME)
 
     def __init_glut(self):
         glutInit(sys.argv)
@@ -42,9 +43,10 @@ class Game(object):
 
         glutDisplayFunc(self.MyDisplayFunc)
         # glutIdleFunc(self.MyIdleFunc)
+        # glutMouseFunc(self.MyMouseFunc)
         glutKeyboardFunc(self.MyKeyboardFunc)
-        glutMouseFunc(self.MyMouseFunc)
         glutReshapeFunc(self.MyReshapeFunc)
+        glutTimerFunc(0, self.refresh_display, Game.REFRESH_TIME)
         glutMainLoop()
 
     def MyDisplayFunc(self):
@@ -57,15 +59,18 @@ class Game(object):
         self.draw_hero()
         self.draw_enemy(self.enemy1)
         self.draw_enemy(self.enemy2)
-        self.draw_enemy(Enemy(3, 3))
-        self.draw_enemy(Enemy(4, 4))
-        self.draw_enemy(Enemy(5, 5))
+        # self.draw_enemy(Enemy(3, 3))
+        # self.draw_enemy(Enemy(4, 4))
+        # self.draw_enemy(Enemy(5, 5))
         # self.draw_enemy(Enemy(6,6))
         # self.draw_enemy(Enemy(7,7))
         # self.draw_enemy(Enemy(8,8))
         # self.draw_enemy(Enemy(9,9))
 
         self.draw_score()
+        self.draw_lives()
+        if Maze.Game_Over:
+            self.draw_game_over()
 
         glFlush()
         glutSwapBuffers()  # Swap the front and back frame buffers (double buffering)
@@ -117,18 +122,26 @@ class Game(object):
     def draw_score(self):
         glRasterPos2i(100, 120)
         glColor4f(0.5, 0.6, 1.0, 1.0)
-        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render")
+        # glutBitmapString(GLUT_BITMAP_HELVETICA_18, "Score : " +  Hero.SCORE)
 
     def draw_lives(self):
         glRasterPos2i(100, 120)
         glColor4f(0.5, 0.6, 1.0, 1.0)
-        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render")
-
+        # glutBitmapString(GLUT_BITMAP_HELVETICA_18, "Lives : " + Hero.LIVE)
 
     def draw_game_over(self):
         glRasterPos2i(100, 120)
         glColor4f(0.5, 0.6, 1.0, 1.0)
-        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "text to render")
+        if Maze.Game_Over and Hero.LIVE > 0:
+            # glutBitmapString(GLUT_BITMAP_HELVETICA_18, U_WON_TEXT)
+            pass
+        else:
+            # glutBitmapString(GLUT_BITMAP_HELVETICA_18, GAME_OVER_TEXT)
+            pass
+
+    def refresh_display(self, time_millisec):
+        glutPostRedisplay()
+        glutTimerFunc(time_millisec, self.refresh_display, time_millisec)
 
     @staticmethod
     def MyIdleFunc():
