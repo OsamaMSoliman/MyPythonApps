@@ -1,4 +1,5 @@
 from SIC_XE.SIC_XE_methods import *
+from SIC_XE.SIC_XE_Data import *
 
 
 def test_print(things):
@@ -81,7 +82,7 @@ def test_OPTAB_Duplicates():
             dic[OperationTable[e].obj_code] = 0
 
 
-def run_test():
+def run_my_test():
     lines = test_read_file("exampleXE")
     instructions = test_parse_lines(lines)
     prog_len = test_calc_addresses(instructions)
@@ -94,4 +95,4 @@ def run_test():
 
 
 if __name__ == "__main__":
-    run_test()
+    run_my_test()

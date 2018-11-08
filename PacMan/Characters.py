@@ -5,7 +5,6 @@ from time import sleep
 
 class __Character(object):
     def __init__(self, posX=0, posY=0):
-        self._startingPosX, self._startingPosY = posX, posY
         self.posX, self.posY = posX, posY
 
     def move(self, direction):
@@ -40,6 +39,7 @@ class Hero(__Character):
 
     def __init__(self, posX=0, posY=0, lives=1):
         super().__init__(posX, posY)
+        self._startingPosX, self._startingPosY = posX, posY
         Hero.LIVE = lives
         Hero.SCORE = 0
 

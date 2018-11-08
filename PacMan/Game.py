@@ -122,7 +122,7 @@ class Game(object):
     def draw_score(self):
         glRasterPos2i(100, 120)
         glColor4f(0.5, 0.6, 1.0, 1.0)
-        # glutBitmapString(GLUT_BITMAP_HELVETICA_18, "Score : " +  Hero.SCORE)
+        # glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, "Score : " +Hero.SCORE)
 
     def draw_lives(self):
         glRasterPos2i(100, 120)

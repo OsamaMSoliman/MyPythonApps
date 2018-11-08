@@ -3,7 +3,16 @@ from SIC_XE.SIC_XE_Data import *
 from SIC_XE.SIC_XE_Literal import *
 
 
+def decimal(hex_str):
+    return int(hex_str, 16)
+
+
+def hex_string(decimal_num):
+    return hex(decimal_num)[2:]
+
+
 def read_file(file_name):
+    file_name = "ExamplePrograms/" + file_name
     if os.path.isfile(file_name):
         lines = []
         with open(file_name) as f:
@@ -16,7 +25,7 @@ def parse_lines(lines):
     instructions = []
     instr = None
     for line in lines:
-        # check if it's a comment or an empty line
+        # check if it's a comment or an empty line ((((comments must be on a separate line))))
         if line.strip().startswith('.') or len(line.strip()) == 0:
             continue
         splitted = line.split()
@@ -28,6 +37,8 @@ def parse_lines(lines):
             instr = Instruction(label=None, operation=splitted[0], operand=None)
         else:
             ERROR.NO_ERROR = False
+            instr = None
+            # Debugging:: how should this error appear to the user?
         instructions.append(instr)
     return instructions
 
@@ -36,10 +47,10 @@ def calc_addresses(instructions):
     starting_address = 0x0000
     first_instr = instructions[0]
     if first_instr.operation.casefold() == "START".casefold():
-        starting_address = int(first_instr.operand, 16)
+        starting_address = decimal(first_instr.operand)
     current_address = starting_address
     for instr in instructions:
-        instr.address = hex(current_address)
+        instr.address = hex_string(current_address)
         operation = instr.operation.casefold()
         if operation == "START".casefold() or operation == "BASE".casefold() \
                 or operation == "NOBASE".casefold():
@@ -66,44 +77,54 @@ def calc_addresses(instructions):
         else:
             if instr.operation[0] == "+":
                 instruction_length = 4
+            elif instr.operation.startswith('='):
+                continue
             else:
                 instruction_length = OperationTable[instr.operation].format
-            # check for literal in operand if so process it
-            if instr.operand is not None and instr.operand.startswith('='):
-                if instr.operand[1] == '*':
-                    Literal.process(instr.operand, current_address)
-                Literal.process(instr.operand)
         instr.length = instruction_length
         current_address += instruction_length
+        # check for literal in operand if so process it
+        check_for_literal(instr.operand, current_address)
     return current_address - starting_address
 
 
 def create_symbol_table(instructions):
     for instr in instructions:
         if instr.label is not None:
-            if instr.label not in SymbolTable:
-                SymbolTable[instr.label] = instr.address
+            if instr.label == '*':
+                continue
+            elif instr.label not in SymbolTable:
+                if instr.operation.casefold() == "EQU".casefold():
+                    SymbolTable[instr.label] = Symbol(False, instr.operand)
+                else:
+                    SymbolTable[instr.label] = Symbol(True, instr.address)
             else:
                 ERROR.NO_ERROR = False
                 instr.error = ERROR.Duplicated_Label + instr.label
                 print(instr.error)
-    # SymbolTable[None] = "Congratz u triggered a Secret bug !"
-    return SymbolTable
+                # SymbolTable[None] = "Congratz u triggered a Secret bug !"
+
+
+def process_operand(operand):
+    relative, value = True, None
+    return relative, value
 
 
 def create_obj_codes(instructions):
-    obj_codes = []
     for instr in instructions:
         operation = instr.operation.casefold()
-        if operation == "RESW".casefold() \
+        if operation.startswith('=') \
+                or operation == "RESW".casefold() \
                 or operation == "RESB".casefold() \
                 or operation == "START".casefold() \
-                or operation == "END".casefold():
+                or operation == "END".casefold() \
+                or operation == "LTORG".casefold():
             instr.obj_code = None
         elif operation == "BASE".casefold():
             instr.obj_code = ""
             BaseReg.BaseFlag = True
             BaseReg.setBaseValue()
+            print(BaseReg.BaseValue)
         elif operation == "NOBASE".casefold():
             instr.obj_code = ""
             BaseReg.BaseFlag = False
@@ -114,26 +135,20 @@ def create_obj_codes(instructions):
         else:
             calc_object_code(instr)
             BaseReg.check_ldb(instr)
-        obj_codes.append(instr.obj_code)
-    return obj_codes
 
 
 def calc_object_code(instr):
-    formats = {
-        1: format1_2,
-        2: format1_2,
-        3: format3_4,
-        4: format3_4
-    }
-    operatoin = instr.operation
-    if instr.length == 4:
-        operatoin = instr.operation[1:]
-    if OperationTable.get(operatoin) is None:
+    if OperationTable.get(instr.get_operation()) is None:
         ERROR.NO_ERROR = False
         instr.error = ERROR.Undefined_Operation + instr.operation
         print(instr.error)
         return
-    return formats[instr.length](instr)
+    return {
+        1: format1_2,
+        2: format1_2,
+        3: format3_4,
+        4: format3_4
+    }[instr.length](instr)
 
 
 def format1_2(instr):
@@ -159,7 +174,12 @@ def format1_2(instr):
 def format3_4(instr):
     obj_code = None
     instr.check_addressing_mode()
-    target_address = SymbolTable.get(instr.operand)
+    target_address = None
+    if instr.operand is not None and instr.operand.startswith('='):
+        target_address = Literal.get_address_from_table(instr.operand)
+        print(target_address)
+    else:
+        target_address = SymbolTable.get(instr.operand)
     if target_address is None:
         if instr.operand is None:  # RSUB case
             instr.obj_code = "4C0000"
@@ -183,6 +203,7 @@ def format3_4(instr):
                 ERROR.NO_ERROR = False
                 instr.error = ERROR.Out_Of_Range if nixbpe else ERROR.Use_Base
                 print(instr.error)
+                return None
             instr.addressing_mode |= nixbpe
         obj_code = hex(int(OperationTable[instr.operation].obj_code, 16) << 4 | instr.addressing_mode)
         obj_code = "{:03X}{:03X}".format(int(obj_code, 16), int(target_address, 16))
@@ -208,13 +229,13 @@ def calc_disp(target_address, PC_value):
     return hex(disp), nixbpe
 
 
-def create_lisfile(instructions):
-    with open("lisfile", "w+") as f:
+def create_lisfile(filename, instructions):
+    with open("ExamplePrograms/OUTPUT/" + filename + "_lisfile", "w+") as f:
         for instr in instructions:
             f.write(instr.list_file_format())
 
 
-def create_objfile(instructions, prog_len):
+def create_objfile(filename, instructions, prog_len):
     if ERROR.NO_ERROR:
         records = []
         h_record = create_h_record(instructions[0], prog_len)
@@ -226,15 +247,15 @@ def create_objfile(instructions, prog_len):
         # records.extend(r_records)
         t_records = create_t_record(instructions)
         records.extend(t_records)
-        m_records = create_m_record(instructions)
-        records.extend(m_records)
-        for i in range(len(instructions)-1, 0, -1):
+        # m_records = create_m_record(instructions)
+        # records.extend(m_records)
+        for i in range(len(instructions) - 1, 0, -1):
             if instructions[i].operation.casefold() == "END".casefold():
                 e_record = create_e_record(instructions[i])
                 # print(e_record)
                 records.append(e_record)
                 break
-        with open("objfile", "w+") as f:
+        with open("ExamplePrograms/OUTPUT/" + filename + "_objfile", "w+") as f:
             for record in records:
                 f.write(record + "\n")
     return not ERROR.NO_ERROR

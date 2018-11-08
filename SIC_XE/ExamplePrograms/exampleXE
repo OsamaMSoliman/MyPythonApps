@@ -44,8 +44,8 @@ WLOOP	TD		OUTPUT
         RSUB
 OUTPUT  BYTE   X'06'
 . this is a comment before using literals
-.       LDA    =C'A'
-.        LTORG
+       LDA    =C'A'
+        LTORG
 . the following lines will contain some errors intentionally
 .        XXX    #0
 .        LDA    XXX

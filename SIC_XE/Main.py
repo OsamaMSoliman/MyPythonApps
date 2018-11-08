@@ -21,10 +21,10 @@ def first_path(filename):
     return prog_len, instructions
 
 
-def second_path(instructions, prog_len):
+def second_path(filename, instructions, prog_len):
     create_obj_codes(instructions)
-    create_lisfile(instructions)
-    error = create_objfile(instructions, prog_len)
+    create_lisfile(filename, instructions)
+    error = create_objfile(filename, instructions, prog_len)
     if error:
         print("ERROR! plz check list file")
     else:
@@ -33,7 +33,7 @@ def second_path(instructions, prog_len):
 
 def run(filename):
     prog_len, instructions = first_path(filename)
-    second_path(instructions, prog_len)
+    second_path(filename, instructions, prog_len)
 
 
 if __name__ == "__main__":

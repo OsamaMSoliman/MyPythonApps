@@ -9,13 +9,23 @@ def create_literal_pool(current_address):
     literal_instructions = []
     for value in LitTab:
         if LitTab[value].added_to_pool: continue
+        LitTab[value].added_to_pool = True
+        LitTab[value].address = last_address
         instr = Instruction('*', LitTab[value].name, None)
         instr.length = LitTab[value].length
         instr.obj_code = value
         instr.address = last_address
         literal_instructions.append(instr)
-        last_address += LitTab[value].length
+        last_address += instr.length
     return last_address, literal_instructions
+
+# Debugging:: i can send the instruction itself and create the literal faster
+def check_for_literal(instr_operand, pc_value):
+    # check for literal in operand if so process it
+    if instr_operand is not None and instr_operand.startswith('='):
+        if instr_operand[1] == '*':
+            Literal.process(instr_operand, pc_value)
+        Literal.process(instr_operand)
 
 
 class Literal(object):
@@ -74,10 +84,9 @@ class Literal(object):
         elif second_letter == "X".casefold():
             return round(length / 2), self.name[3:-1].upper()
 
-
-            # @staticmethod
-            # def get_from_table(literal_name):
-            #     value = Literal.__calc_value(literal_name)[1]
-            #     # no need to check as this function will be called on the literal pool
-            #     # and any literal here must have been added before
-            #     return LitTab[value]
+    @staticmethod
+    def get_address_from_table(literal_name):
+        value = Literal.__calc_value(literal_name)[1]
+        # no need to check as this function will be called on the literal pool
+        # and any literal here must have been added before
+        return str(LitTab[value].address)

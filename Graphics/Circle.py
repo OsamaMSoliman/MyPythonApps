@@ -51,6 +51,12 @@ def point_permutations(point):
     return permutations
 
 
+def print_points_circle(points):
+    if points is not None:
+        for p in points:
+            print(p)
+
+
 if __name__ == "__main__":
     points = circle(7, (3, 6))
     for p in points:

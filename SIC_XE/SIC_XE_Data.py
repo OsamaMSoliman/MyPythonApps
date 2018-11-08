@@ -1,3 +1,9 @@
+class Symbol(object):
+    def __init__(self, relative, value):
+        self.relative = relative
+        self.value = value
+
+
 class ERROR(object):
     NO_ERROR = True
     Undefined_Operation = ">>> Error Undefined operation! : "

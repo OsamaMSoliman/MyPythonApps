@@ -42,12 +42,18 @@ class Instruction(object):
         elif first_letter == "X".casefold():
             return self.operand[2:-1].upper()
 
+    def get_operation(self):
+        return self.operation[1:] if self.length == 4 else self.operation
+        # if self.operation[0].casefold() == "+".casefold():
+        #     return self.operation[1:]
+
     def __str__(self):
-        return "{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}".format(self.address,
+        return "{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}\t\t{}".format(self.address,
                                                          self.label, self.operation, self.operand,
-                                                         bin(self.addressing_mode), self.obj_code)
+                                                         bin(self.addressing_mode), self.obj_code, self.length)
 
     def list_file_format(self):
+        self.tzbeet_tarek()
         list_line = [int(self.address, 16), self.label, self.operation, self.operand, self.obj_code]
         for i in range(len(list_line)):
             if list_line[i] is None:
@@ -57,3 +63,13 @@ class Instruction(object):
         if self.error is not None:
             line += self.error + "\n"
         return line
+
+    def tzbeet_tarek(self):
+        if self.addressing_mode & AddressingModes.EXTENDED:
+            self.operation = "+" + self.operation
+        if self.addressing_mode & AddressingModes.DIRECT == AddressingModes.IMMEDIATE:
+            self.operand = "#" + self.operand
+        elif self.addressing_mode & AddressingModes.DIRECT == AddressingModes.INDIRECT:
+            self.operand = "@" + self.operand
+        elif self.addressing_mode & AddressingModes.INDEXED:
+            self.operand += ",X"
